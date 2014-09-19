@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Hangout Demo">
+<Require feature="rpc"/>
+<Require feature="views"/>
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+	<script src="//talkgadget.google.com/hangouts/api/hangout.js?v=1.0"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://pastebin.com/raw.php?i=8nB8PeYL" />
+	<span id="submitString">""</span>
+<style>
+	.answers li { 
+		list-style: upper-alpha; 
+
+	} 
+
+	label { 
+		margin-left: 0.5em; 
+		cursor: pointer; 
+	} 
+
+	#submit { 
+		background: #dddada; 
+		color: 000000; 
+		padding: 3px; 
+		text-align: center; 
+		width: 200px; 
+		cursor: pointer; 
+		border: 1px solid gray; 
+	}
+
+	#results:hover { 
+		background: #3d91b8; 
+		color: #ffffff; 
+		padding: 3px; 
+		text-align: center; 
+		width: 200px; 
+		cursor: pointer; 
+		border: 1px solid gray; 
+	} 
+
+	#categorylist { 
+		margin-top: 6px; 
+		display: none; 
+	} 
+
+	#category1, #category2, #category3, #category4, #category5, #category6, #category7, #category8, #category9, #category10, #category11 { 
+	display: none; 
+</style>
+
+<h1>Test Demo</h1>
+<div id="container"></div>
+
+<script>
+(function (window) {
+"use strict";
+
+function TestDemo() {
+	console.log("Starting...");
+	gapi.hangout.onApiReady.add(this.onApiReady.bind(this));
+}
+
+
+
+TestDemo.prototype.onApiReady = function (event) {
+	if (event.isApiReady === true) {
+		console.log("API Ready");
+		gapi.hangout.onParticipantsChanged.add(this.onParticipantsChanged.bind(this));
+		gapi.hangout.data.onMessageReceived.add(this.onMessageReceived.bind(this));
+		gapi.hangout.data.onStateChanged.add(this.displaySubmission.bind(this));
+		document.getElementById("submit").onclick = (this.submit.bind(this));
+
+		this.displayParticipants();
+	
+	}
+};
+
+TestDemo.prototype.onParticipantsChanged = function (event) {
+	var div = document.getElementById("container");
+	div.innerHTML = "";
+	this.displayParticipants();
+};   
+
+TestDemo.prototype.displayParticipants = function () {
+	var div, participants, ul, li, i, l;
+	participants = gapi.hangout.getParticipants();
+	ul = document.createElement("ul");
+	l = participants.length;
+	for (i = 0; i < l; i++) {
+		li = document.createElement("li");
+		if (participants[i].person) {
+		li.innerHTML = participants[i].person.displayName;
+	} else {
+		li.innerHTML = "unknown";
+	}
+	ul.appendChild(li);
+	}
+	div = document.getElementById("container");
+	div.appendChild(ul);
+};
+
+TestDemo.prototype.submit = function() {
+
+		        if (!$("input[@name=q1]:checked").val() ||            
+		        !$("input[@name=q2]:checked").val() ||            
+		        !$("input[@name=q3]:checked").val() )
+			{            
+	                        console.log("You're not done yet!");        
+                        }   
+			 else {            
+		                var cat1name = "1";            
+		                var cat2name = "2";            
+		                var cat11name = "None";            
+                                   
+ 
+		                var cat1 = ($("input[@name=q1]:checked").val() != "a");
+		                var cat2 = ($("input[@name=q2]:checked").val() != "b");           
+		                var cat11 = (!cat1 && !cat2); var categories = [];                        
+	 
+		                if (cat1) { categories.push(cat1name) };            
+		                if (cat2) { categories.push(cat2name) };            
+		                if (cat11) { categories.push(cat11name) };                        
+	 
+		                var catStr = 'You answered the following questions incorrectly: ' + categories.join(', ') + '';                    
+		                $("#categorylist").text(catStr);                        
+		                $("#categorylist").show("slow");
+		                console.log(catStr);          
+	 
+		                if (cat1) { $("#category1").show("slow"); };            
+		                if (cat2) { $("#category2").show("slow"); };            
+		                if (cat11) { $("#category11").show("slow"); };
+		                { $("#closing").show("slow"); };
+				console.log("Sending value"+ catStr );
+				gapi.hangout.data.sendMessage(catStr);
+				var answers = "Answer 1:" + $("input[@name=q1]:checked").val() +" Answer 2:"+ $("input[@name=q2]:checked").val();
+				gapi.hangout.data.setValue("submitString", answers);
+	                }  
+			
+};
+
+TestDemo.prototype.onMessageReceived = function (event) {
+
+	console.log("SenderID:"+ event.senderId);
+	console.log("submittedAnswers:"+ event.message);
+	   
+};
+
+
+TestDemo.prototype.displaySubmission = function (event) {
+	var value = gapi.hangout.data.getValue("submitString");
+	document.getElementById("submitString").innerHTML = value;
+	console.log("Submission value"+ value );
+};
+
+	var TestDemo = new TestDemo();
+}(window));
+
+</script>
+<p class="question">1. What is the answer to this question?</p>        
+
+<ul class="answers">       
+	<input type="radio" name="q1" value="a" id="q1a"><label for="q1a">Answer 1</label><br/>         
+	<input type="radio" name="q1" value="b" id="q1b"><label for="q1b">Answer 2</label><br/>            
+	<input type="radio" name="q1" value="c" id="q1c"><label for="q1c">Answer 3</label><br/>            
+	<input type="radio" name="q1" value="d" id="q1d"><label for="q1d">Answer 4</label><br/>       
+</ul>        
+
+<p class="question">2. What is the answer to this question?</p>        
+
+<ul class="answers">            
+	<input type="radio" name="q2" value="a" id="q2a"><label for="q2a">Answer 1</label><br/>           
+	<input type="radio" name="q2" value="b" id="q2b"><label for="q2b">Answer 2</label><br/>            
+	<input type="radio" name="q2" value="c" id="q2c"><label for="q2c">Answer 3</label><br/>           
+	<input type="radio" name="q2" value="d" id="q2d"><label for="q2d">Answer 4</label><br/>       
+</ul>  
+<div id="submit">            
+	Submit!       
+</div>                
+
+<div id="category1">            
+<p>              
+	<strong>Question 1:</strong> The correct answer is the <strong>Answer 1</strong>.</p>        
+</div>        
+
+<div id="category2">            
+<p>              
+	<strong>Question 2:</strong> The correct answer is <strong>Answer 2</strong>.</p>        
+</div>        
+<div id="category11">            
+<p>                
+	You answered them all right!</p>        
+</div>
+]]>
+</Content>
+</Module>

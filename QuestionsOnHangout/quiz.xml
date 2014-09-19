@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Hangout Demo">
+<Require feature="rpc"/>
+<Require feature="views"/>
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+	<script src="//talkgadget.google.com/hangouts/api/hangout.js?v=1.0"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://pastebin.com/raw.php?i=8nB8PeYL" />
+	<span id="submitString">""</span>
+<style>
+	.answers li { 
+		list-style: upper-alpha; 
+
+	} 
+
+	label { 
+		margin-left: 0.5em; 
+		cursor: pointer; 
+	} 
+
+	#submit { 
+		background: #dddada; 
+		color: 000000; 
+		padding: 3px; 
+		text-align: center; 
+		width: 200px; 
+		cursor: pointer; 
+		border: 1px solid gray; 
+	}
+
+	#results:hover { 
+		background: #3d91b8; 
+		color: #ffffff; 
+		padding: 3px; 
+		text-align: center; 
+		width: 200px; 
+		cursor: pointer; 
+		border: 1px solid gray; 
+	} 
+
+	#categorylist { 
+		margin-top: 6px; 
+		display: none; 
+	} 
+
+	#category1, #category2, #category3, #category4, #category5, #category6, #category7, #category8, #category9, #category10, #category11 { 
+	display: none; 
+</style>
+
+<h1>Test Demo</h1>
+<div id="container"></div>
+<div>
+    <h1>Your first quiz on Hangout!</h1>
+</div>
+<div class="questions">
+    <p>1. What is the answer to this question?</p>
+    <form class="options">
+        <input class="option" type="radio" name="question1" value=a>Answer 1<br>
+        <input class="option" type="radio" name="question1" value=b>Answer 2<br>
+        <input class="option" type="radio" name="question1" value=c>Answer 3<br>
+        <input class="option" type="radio" name="question1" value=d>Answer 4</br>
+    </form>
+</div>
+<div class="questions">
+    <p>2. What is the answer to this question?</p>
+    <form class="options">
+        <input class="option" type="radio" name="question2" value=a>Answer 1<br>
+        <input class="option" type="radio" name="question2" value=b>Answer 2<br>
+        <input class="option" type="radio" name="question2" value=c>Answer 3<br>
+        <input class="option" type="radio" name="question2" value=d>Answer 4<br>
+    </form>
+</div>
+<div class="questions">
+    <p>3. What is the answer to this question?</p>
+    <form class="options">
+        <input class="option" type="radio" name="question3" value=a>Answer 1<br>
+        <input class="option" type="radio" name="question3" value=b>Answer 2<br>
+        <input class="option" type="radio" name="question3" value=c>Answer 3<br>
+        <input class="option" type="radio" name="question3" value=d>Answer 4<br>
+    </form>
+</div>
+<div class="questions">
+    <p>4. What is the answer to this question?</p>
+    <form>
+        <input class="option" type="radio" name="question4" value=a>Answer 1<br>
+        <input class="option" type="radio" name="question4" value=b>Answer 2<br>
+        <input class="option" type="radio" name="question4" value=c>Answer 3<br>
+        <input class="option" type="radio" name="question4" value=d>Answer 4<br>
+    </form>
+</div>
+<div class="questions">
+    <p>5. What is the answer to this question?</p>
+    <form>
+        <input class="option" type="radio" name="question5" value=a>Answer 1<br>
+        <input class="option" type="radio" name="question5" value=b>Answer 2<br>
+        <input class="option" type="radio" name="question5" value=c>Answer 3<br>
+        <input class="option" type="radio" name="question5" value=d>Answer 4<br>
+    </form>
+</div>
+<div class="questions">
+	<p>you have reached end of quiz. Click Next to submit you Answers!</p>
+</div>
+    <br>
+    <input type="button" id='next' value="Next" onlick="sum_values()">
+    <input type="button" id='submit' value="Submit!" onlick="">
+
+<script>
+(function (window) {
+"use strict";
+
+
+
+function TestDemo() {
+	console.log("Starting...");
+	this.totalQuestions = 0;
+	this.currentQuestion = 0;
+	this.qs ="";
+	this.answers="";
+	gapi.hangout.onApiReady.add(this.onApiReady.bind(this));
+}
+
+$('.option').change(function(){
+    console.log("called optionChange");
+    var answer = ($(this).attr('value'));
+    var question = ($(this).attr('name'));
+    console.log("Q:"+question+":"+answer);
+    TestDemo.answers = TestDemo.answers + ":" +answer;
+    console.log("ans string:"+ TestDemo.answers);
+ })
+
+
+TestDemo.prototype.onApiReady = function (event) {
+	if (event.isApiReady === true) {
+		console.log("API Ready");
+
+		gapi.hangout.onParticipantsChanged.add(this.onParticipantsChanged.bind(this));
+		gapi.hangout.data.onMessageReceived.add(this.onMessageReceived.bind(this));
+		gapi.hangout.data.onStateChanged.add(this.displaySubmission.bind(this));
+		document.getElementById("next").onclick = (this.next.bind(this));
+		document.getElementById('submit').style.visibility='hidden';
+		document.getElementById("submit").onclick = (this.submit.bind(this));
+		$('.option').onChange = (this.optionChange.bind(this));
+		this.displayParticipants();
+		
+		this.totalQuestions = $('.questions').size();
+		console.log("totalq:" + this.totalQuestions);
+
+		this.qs = $('.questions');
+		this.qs.hide();
+		$(this.qs.get(this.currentQuestion)).fadeIn();
+	
+	}
+};
+
+TestDemo.prototype.onParticipantsChanged = function (event) {
+	var div = document.getElementById("container");
+	div.innerHTML = "";
+	this.displayParticipants();
+};   
+
+TestDemo.prototype.optionChange = function () {
+
+	contsole.log("called optionChange");
+	var answer = ($(this).attr('value'));
+    	var question = ($(this).attr('name'));
+	console.log("Q:"+question+":"+"A"+answer);
+   	this.answers[question] = answer;
+}
+
+TestDemo.prototype.displayParticipants = function () {
+	var div, participants, ul, li, i, l;
+	participants = gapi.hangout.getParticipants();
+	ul = document.createElement("ul");
+	l = participants.length;
+	for (i = 0; i < l; i++) {
+		li = document.createElement("li");
+		if (participants[i].person) {
+		li.innerHTML = participants[i].person.displayName;
+	} else {
+		li.innerHTML = "unknown";
+	}
+	ul.appendChild(li);
+	}
+	div = document.getElementById("container");
+	div.appendChild(ul);
+};
+
+TestDemo.prototype.next = function() {
+
+   	console.log("called next..." + this.totalQuestions +":" + this.currentQuestion);
+   	this.currentQuestion ++;
+	console.log("curr q..." + this.currentQuestion);
+	this.qs.hide();
+        if(this.currentQuestion == this.totalQuestions){
+              console.log("Reached Total questions");
+	      document.getElementById('submit').style.visibility='visible';
+	      document.getElementById('next').style.visibility='hidden';
+        }else{
+		console.log("next question");
+        	$(this.qs.get(this.currentQuestion)).fadeIn();
+        }
+   
+};
+
+TestDemo.prototype.submit = function() {
+
+	var catStr = this.answers;
+	console.log("Submitting answers:"+ catStr );
+	gapi.hangout.data.sendMessage(catStr);
+	gapi.hangout.data.setValue("submitString", catStr);
+};
+
+TestDemo.prototype.onMessageReceived = function (event) {
+
+	console.log("SenderID:"+ event.senderId);
+	console.log("submittedAnswers:"+ event.message);
+	   
+};
+
+
+TestDemo.prototype.displaySubmission = function (event) {
+	var value = gapi.hangout.data.getValue("submitString");
+	document.getElementById("submitString").innerHTML = value;
+	console.log("Submission value"+ value );
+};
+
+	var TestDemo = new TestDemo();
+}(window));
+
+</script>
+
+]]>
+</Content>
+</Module>
